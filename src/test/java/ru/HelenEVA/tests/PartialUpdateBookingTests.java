@@ -1,28 +1,63 @@
 package ru.HelenEVA.tests;
 
+import com.github.javafaker.Faker;
+import io.restassured.RestAssured;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import ru.HelenEva.dao.BookingdatesRequest;
+import ru.HelenEva.dao.CreateTokenRequest;
+import ru.HelenEva.dao.PartialUpdateBookingRequest;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Properties;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.*;
-
 public class PartialUpdateBookingTests {
+
+    private static final String PROPERTIES_FILE_PATH = "src/test/resources/application.properties";
+    private static CreateTokenRequest request;
+    private static BookingdatesRequest requestBookingdates;
+    private static PartialUpdateBookingRequest requestPartialupdate;
+    static Properties properties = new Properties();
+    static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    static Faker faker = new Faker();
 
     static String token;
     static String id;
 
     @BeforeAll
-    static void beforeAll() {
+    static void beforeAll() throws IOException {
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+        properties.load(new FileInputStream(PROPERTIES_FILE_PATH));
+        RestAssured.baseURI = properties.getProperty("base.url");
+
+        request = CreateTokenRequest.builder()
+                .username("admin")
+                .password("password123")
+                .build();
+
+        requestBookingdates = BookingdatesRequest.builder()
+                .checkin(dateFormat.format(faker.date().birthday().getDate()))
+                .checkout(dateFormat.format(faker.date().birthday().getDate()))
+                .build();
+
+        requestPartialupdate = PartialUpdateBookingRequest.builder()
+                .firstname("Mary")
+                .lastname("Brown")
+                .totalprice(111)
+                .depositpaid(true)
+                .bookingdates(requestBookingdates)
+                .additionalneeds("Breakfast")
+                .build();
+
         token = given()
                 .log()
                 .all()
                 .header("Content-Type", "application/json")
-                .body("{\n" +
-                        "    \"username\" : \"admin\",\n" +
-                        "    \"password\" : \"password123\"\n" +
-                        "}")
+                .body(request)
                 .expect()
                 .statusCode(200)
                 .body("token", is(not(nullValue())))
@@ -42,21 +77,11 @@ public class PartialUpdateBookingTests {
                 .log()
                 .all()
                 .header("Content-Type", "application/json")
-                .body("{\n"
-                        + "    \"firstname\" : \"Jim\",\n"
-                        + "    \"lastname\" : \"Brown\",\n"
-                        + "    \"totalprice\" : 111,\n"
-                        + "    \"depositpaid\" : true,\n"
-                        + "    \"bookingdates\" : {\n"
-                        + "        \"checkin\" : \"2018-01-01\",\n"
-                        + "        \"checkout\" : \"2019-01-01\"\n"
-                        + "    },\n"
-                        + "    \"additionalneeds\" : \"Breakfast\"\n"
-                        + "}")
+                .body(requestPartialupdate)
                 .expect()
                 .statusCode(200)
                 .when()
-                .post("https://restful-booker.herokuapp.com/booking")
+                .post("booking")
                 .prettyPeek()
                 .body()
                 .jsonPath()
@@ -76,7 +101,7 @@ public class PartialUpdateBookingTests {
                 .body()
                 .header("Cookie", "token="+token)
                 .when()
-                .delete("https://restful-booker.herokuapp.com/booking/" + id)
+                .delete("booking/" + id)
                 .prettyPeek()
                 .then()
                 .statusCode(201);
@@ -95,28 +120,18 @@ public class PartialUpdateBookingTests {
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
                 .header("Cookie", "token=" + token)
-                .body("{\n" +
-                        "    \"firstname\" : \"Petr\",\n" +
-                        "    \"lastname\" : \"Brown\",\n" +
-                        "    \"totalprice\" : 111,\n" +
-                        "    \"depositpaid\" : true,\n" +
-                        "    \"bookingdates\" : {\n" +
-                        "        \"checkin\" : \"2022-01-01\",\n" +
-                        "        \"checkout\" : \"2022-02-01\"\n" +
-                        "    },\n" +
-                        "    \"additionalneeds\" : \"Breakfast\"\n" +
-                        "}")
+                .body(requestPartialupdate)
                 .when()
-                .patch("https://restful-booker.herokuapp.com/booking/" + id)
+                .patch("/booking/" + id)
                 .prettyPeek()
                 .then()
                 .statusCode(200)
-                .body("firstname", equalTo("Petr"))
+                .body("firstname", equalTo("Mary"))
                 .body("lastname", equalTo("Brown"))
                 .body("totalprice", equalTo(Integer.valueOf("111")))
                 .body("depositpaid", equalTo(Boolean.valueOf("true")))
-                .body("bookingdates.checkin", is(equalTo("2022-01-01")))
-                .body("bookingdates.checkout", is(equalTo("2022-02-01")))
+                .body("bookingdates.checkin", is(equalTo("1970-01-01")))
+                .body("bookingdates.checkout", is(equalTo("1970-01-01")))
                 .body("additionalneeds", equalTo("Breakfast"));
     }
 
@@ -133,28 +148,18 @@ public class PartialUpdateBookingTests {
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
                 .header("Authorization", "Basic YWRtaW46cGFzc3dvcmQxMjM=")
-                .body("{\n" +
-                        "    \"firstname\" : \"Petr\",\n" +
-                        "    \"lastname\" : \"Brown\",\n" +
-                        "    \"totalprice\" : 111,\n" +
-                        "    \"depositpaid\" : true,\n" +
-                        "    \"bookingdates\" : {\n" +
-                        "        \"checkin\" : \"2022-01-01\",\n" +
-                        "        \"checkout\" : \"2022-02-01\"\n" +
-                        "    },\n" +
-                        "    \"additionalneeds\" : \"Breakfast\"\n" +
-                        "}")
+                .body(requestPartialupdate)
                 .when()
-                .patch("https://restful-booker.herokuapp.com/booking/" + id)
+                .patch("/booking/" + id)
                 .prettyPeek()
                 .then()
                 .statusCode(200)
-                .body("firstname", equalTo("Petr"))
+                .body("firstname", equalTo("Mary"))
                 .body("lastname", equalTo("Brown"))
                 .body("totalprice", equalTo(Integer.valueOf("111")))
                 .body("depositpaid", equalTo(Boolean.valueOf("true")))
-                .body("bookingdates.checkin", is(equalTo("2022-01-01")))
-                .body("bookingdates.checkout", is(equalTo("2022-02-01")))
+                .body("bookingdates.checkin", is(equalTo("1970-01-01")))
+                .body("bookingdates.checkout", is(equalTo("1970-01-01")))
                 .body("additionalneeds", equalTo("Breakfast"));
     }
 
@@ -170,19 +175,9 @@ public class PartialUpdateBookingTests {
                 .body()
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
-                .body("{\n" +
-                        "    \"firstname\" : \"Petr\",\n" +
-                        "    \"lastname\" : \"Brown\",\n" +
-                        "    \"totalprice\" : 111,\n" +
-                        "    \"depositpaid\" : true,\n" +
-                        "    \"bookingdates\" : {\n" +
-                        "        \"checkin\" : \"2022-01-01\",\n" +
-                        "        \"checkout\" : \"2022-02-01\"\n" +
-                        "    },\n" +
-                        "    \"additionalneeds\" : \"Breakfast\"\n" +
-                        "}")
+                .body(requestPartialupdate)
                 .when()
-                .patch("https://restful-booker.herokuapp.com/booking/" + id)
+                .patch("/booking/" + id)
                 .prettyPeek()
                 .then()
                 .statusCode(403);
@@ -201,15 +196,13 @@ public class PartialUpdateBookingTests {
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
                 .header("Cookie", "token=" + token)
-                .body("{\n" +
-                        "    \"firstname\" : \"Mary\"\n" +
-                        "}")
+                .body(requestPartialupdate.withFirstname("Tom"))
                 .when()
                 .patch("https://restful-booker.herokuapp.com/booking/" + id)
                 .prettyPeek()
                 .then()
                 .statusCode(200)
-                .body("firstname", equalTo("Mary"));
+                .body("firstname", equalTo("Tom"));
     }
 
     @Test
@@ -226,11 +219,9 @@ public class PartialUpdateBookingTests {
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
                 .header("Cookie", "token=" + token)
-                .body("{\n" +
-                        "    \"firstname\" : \"MARY\"\n" +
-                        "}")
+                .body(requestPartialupdate.withFirstname("MARY"))
                 .when()
-                .patch("https://restful-booker.herokuapp.com/booking/" + id)
+                .patch("/booking/" + id)
                 .prettyPeek()
                 .then()
                 .statusCode(200)
@@ -249,11 +240,9 @@ public class PartialUpdateBookingTests {
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
                 .header("Cookie", "token=" + token)
-                .body("{\n" +
-                        "    \"lastname\" : \"Мария\"\n" +
-                        "}")
+                .body(requestPartialupdate.withLastname("Мария"))
                 .when()
-                .patch("https://restful-booker.herokuapp.com/booking/" + id)
+                .patch("/booking/" + id)
                 .prettyPeek()
                 .then()
                 .statusCode(200)
@@ -261,7 +250,7 @@ public class PartialUpdateBookingTests {
     }
 
     @Test
-    void updateBookingFirstNameEmptyValueNegativeTest() {
+    void updateBookingFirstName1siSymbolPositiveTest() {
         given()
                 .log()
                 .method()
@@ -272,18 +261,17 @@ public class PartialUpdateBookingTests {
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
                 .header("Cookie", "token=" + token)
-                .body("{\n" +
-                        "    \"firstname\" : ,\n" +
-                        "}")
+                .body(requestPartialupdate.withFirstname("L"))
                 .when()
-                .patch("https://restful-booker.herokuapp.com/booking/" + id)
+                .patch("/booking/" + id)
                 .prettyPeek()
                 .then()
-                .statusCode(400);
+                .statusCode(200)
+                .body("firstname", equalTo("L"));
     }
 
     @Test
-    void updateBookingInvalidDateFormatNegativeTest() {
+    void updateBookingCheckInChangePositiveTest() {
 
         given()
                 .log()
@@ -295,20 +283,17 @@ public class PartialUpdateBookingTests {
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
                 .header("Cookie", "token=" + token)
-                .body("{\n" +
-                        "    \"bookingdates\" : {\n" +
-                        "        \"checkin\" : \"2022.01.01\",\n" +
-                        "        \"checkout\" : \"2022.02.01\"\n" +
-                        "}")
+                .body(requestPartialupdate.withBookingdates(requestBookingdates.withCheckin("1990-05-05")))
                 .when()
-                .patch("https://restful-booker.herokuapp.com/booking/" + id)
+                .patch("/booking/" + id)
                 .prettyPeek()
                 .then()
-                .statusCode(400);
+                .statusCode(200)
+                .body("bookingdates.checkin", equalTo("1990-05-05"));
     }
 
     @Test
-    void updateBookingCheckInDateBeforeCheckOutNegativeTest() {
+    void updateBookingCheckOutChangePositiveTest() {
 
         given()
                 .log()
@@ -320,15 +305,12 @@ public class PartialUpdateBookingTests {
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
                 .header("Cookie", "token=" + token)
-                .body("{\n" +
-                        "    \"bookingdates\" : {\n" +
-                        "        \"checkin\" : \"2022.01.01\",\n" +
-                        "        \"checkout\" : \"2021.02.01\"\n" +
-                        "}")
+                .body(requestPartialupdate.withBookingdates(requestBookingdates.withCheckout("1990-05-05")))
                 .when()
-                .patch("https://restful-booker.herokuapp.com/booking/" + id)
+                .patch("/booking/" + id)
                 .prettyPeek()
                 .then()
-                .statusCode(400);
+                .statusCode(200)
+                .body("bookingdates.checkout", equalTo("1990-05-05"));
     }
 }

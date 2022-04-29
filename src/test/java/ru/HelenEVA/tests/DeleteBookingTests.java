@@ -1,33 +1,70 @@
 package ru.HelenEVA.tests;
 
+import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.HelenEva.dao.BookingdatesRequest;
+import ru.HelenEva.dao.CreateTokenRequest;
+import ru.HelenEva.dao.PartialUpdateBookingRequest;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.*;
+import static ru.HelenEVA.tests.PartialUpdateBookingTests.dateFormat;
+import static ru.HelenEVA.tests.PartialUpdateBookingTests.faker;
 
 public class DeleteBookingTests {
+
+    private static final String PROPERTIES_FILE_PATH = "src/test/resources/application.properties";
+    private static CreateTokenRequest request;
+    private static BookingdatesRequest requestBookingdates;
+    private static PartialUpdateBookingRequest requestPartialupdate;
+    static Properties properties = new Properties();
 
     static String token;
     String id;
 
     @BeforeAll
-    static void beforeAll() {
+    static void beforeAll() throws IOException {
+
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+        properties.load(new FileInputStream(PROPERTIES_FILE_PATH));
+        RestAssured.baseURI = properties.getProperty("base.url");
+
+        request = CreateTokenRequest.builder()
+                .username("admin")
+                .password("password123")
+                .build();
+
+        requestBookingdates = BookingdatesRequest.builder()
+                .checkin(dateFormat.format(faker.date().birthday().getDate()))
+                .checkout(dateFormat.format(faker.date().birthday().getDate()))
+                .build();
+
+        requestPartialupdate = PartialUpdateBookingRequest.builder()
+                .firstname("Mary")
+                .lastname("Brown")
+                .totalprice(111)
+                .depositpaid(true)
+                .bookingdates(requestBookingdates)
+                .additionalneeds("Breakfast")
+                .build();
 
         token = given()
                 .log()
                 .all()
                 .header("Content-Type", "application/json")
-                .body("{\n" +
-                        "    \"username\" : \"admin\",\n" +
-                        "    \"password\" : \"password123\"\n" +
-                        "}")
+                .body(request)
                 .expect()
                 .statusCode(200)
                 .body("token", is(not(nullValue())))
                 .when()
-                .post("https://restful-booker.herokuapp.com/auth")
+                .post("auth")
                 .prettyPeek()
                 .body()
                 .jsonPath()
@@ -43,21 +80,11 @@ public class DeleteBookingTests {
                 .log()
                 .all()
                 .header("Content-Type", "application/json")
-                .body("{\n"
-                        + "    \"firstname\" : \"Jim\",\n"
-                        + "    \"lastname\" : \"Brown\",\n"
-                        + "    \"totalprice\" : 111,\n"
-                        + "    \"depositpaid\" : true,\n"
-                        + "    \"bookingdates\" : {\n"
-                        + "        \"checkin\" : \"2018-01-01\",\n"
-                        + "        \"checkout\" : \"2019-01-01\"\n"
-                        + "    },\n"
-                        + "    \"additionalneeds\" : \"Breakfast\"\n"
-                        + "}")
+                .body(requestPartialupdate)
                 .expect()
                 .statusCode(200)
                 .when()
-                .post("https://restful-booker.herokuapp.com/booking")
+                .post("booking")
                 .prettyPeek()
                 .body()
                 .jsonPath()
@@ -77,7 +104,7 @@ public class DeleteBookingTests {
                 .body()
                 .header("Cookie", "token="+token)
                 .when()
-                .delete("https://restful-booker.herokuapp.com/booking/"+id)
+                .delete("/booking/"+id)
                 .prettyPeek()
                 .then()
                 .statusCode(201);
@@ -95,7 +122,7 @@ public class DeleteBookingTests {
                 .body()
                 .header("Authorization", "Basic YWRtaW46cGFzc3dvcmQxMjM=")
                 .when()
-                .delete("https://restful-booker.herokuapp.com/booking/" + id)
+                .delete("/booking/" + id)
                 .prettyPeek()
                 .then()
                 .statusCode(201);
@@ -112,7 +139,7 @@ public class DeleteBookingTests {
                 .log()
                 .body()
                 .when()
-                .delete("https://restful-booker.herokuapp.com/booking/" + id)
+                .delete("/booking/" + id)
                 .prettyPeek()
                 .then()
                 .statusCode(403);
