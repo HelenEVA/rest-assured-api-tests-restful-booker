@@ -17,7 +17,6 @@ public class CreateTokenTests {
 
     private static final String PROPERTIES_FILE_PATH = "src/test/resources/application.properties";
     private static CreateTokenRequest request;
-    private static CreateTokenResponse response;
     static Properties properties = new Properties();
 
 
@@ -38,7 +37,7 @@ public class CreateTokenTests {
     @Test
     void createTokenPositiveTest() {
 
-        response = given()
+        CreateTokenResponse response = given()
                 .log()
                 .method()
                 .log()

@@ -2,6 +2,7 @@ package ru.HelenEVA.tests;
 
 import com.github.javafaker.Faker;
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,9 @@ import java.text.SimpleDateFormat;
 import java.util.Properties;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 public class PartialUpdateBookingTests {
 
     private static final String PROPERTIES_FILE_PATH = "src/test/resources/application.properties";
@@ -138,7 +142,7 @@ public class PartialUpdateBookingTests {
     @Test
     void updateBookingAuthorisationPositiveTest() {
 
-        given()
+        Response response = given()
                 .log()
                 .method()
                 .log()
@@ -151,16 +155,15 @@ public class PartialUpdateBookingTests {
                 .body(requestPartialupdate)
                 .when()
                 .patch("/booking/" + id)
-                .prettyPeek()
-                .then()
-                .statusCode(200)
-                .body("firstname", equalTo("Mary"))
-                .body("lastname", equalTo("Brown"))
-                .body("totalprice", equalTo(Integer.valueOf("111")))
-                .body("depositpaid", equalTo(Boolean.valueOf("true")))
-                .body("bookingdates.checkin", is(equalTo("1970-01-01")))
-                .body("bookingdates.checkout", is(equalTo("1970-01-01")))
-                .body("additionalneeds", equalTo("Breakfast"));
+                .prettyPeek();
+        assertThat(response.statusCode(), equalTo(200));
+        assertThat(response.body().jsonPath().get("firstname"),equalTo("Mary"));
+        assertThat(response.body().jsonPath().get("lastname"),equalTo("Brown"));
+        assertThat(response.body().jsonPath().get("totalprice"),equalTo(Integer.valueOf("111")));
+        assertThat(response.body().jsonPath().get("depositpaid"),equalTo(Boolean.valueOf("true")));
+        assertThat(response.body().jsonPath().get("bookingdates.checkin"),is(equalTo("1970-01-01")));
+        assertThat(response.body().jsonPath().get("bookingdates.checkout"),is(equalTo("1970-01-01")));
+        assertThat(response.body().jsonPath().get("additionalneeds"),equalTo("Breakfast"));
     }
 
     @Test
@@ -198,7 +201,7 @@ public class PartialUpdateBookingTests {
                 .header("Cookie", "token=" + token)
                 .body(requestPartialupdate.withFirstname("Tom"))
                 .when()
-                .patch("https://restful-booker.herokuapp.com/booking/" + id)
+                .patch("/booking/" + id)
                 .prettyPeek()
                 .then()
                 .statusCode(200)
