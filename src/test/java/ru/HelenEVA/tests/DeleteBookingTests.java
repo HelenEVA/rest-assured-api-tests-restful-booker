@@ -1,6 +1,6 @@
 package ru.HelenEVA.tests;
 
-import io.restassured.RestAssured;
+import io.qameta.allure.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,33 +8,17 @@ import ru.HelenEva.dao.BookingdatesRequest;
 import ru.HelenEva.dao.CreateTokenRequest;
 import ru.HelenEva.dao.PartialUpdateBookingRequest;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Properties;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.*;
-import static ru.HelenEVA.tests.PartialUpdateBookingTests.dateFormat;
-import static ru.HelenEVA.tests.PartialUpdateBookingTests.faker;
 
-public class DeleteBookingTests {
+@Severity(SeverityLevel.BLOCKER)
+@Story("Delete a booking")
+@Feature("Tests for booking deletion")
 
-    private static final String PROPERTIES_FILE_PATH = "src/test/resources/application.properties";
-    private static CreateTokenRequest request;
-    private static BookingdatesRequest requestBookingdates;
-    private static PartialUpdateBookingRequest requestPartialupdate;
-    static Properties properties = new Properties();
-
-    static String token;
-    String id;
+public class DeleteBookingTests extends BaseTest {
 
     @BeforeAll
-    static void beforeAll() throws IOException {
-
-        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-        properties.load(new FileInputStream(PROPERTIES_FILE_PATH));
-        RestAssured.baseURI = properties.getProperty("base.url");
+    static void beforeAll() {
 
         request = CreateTokenRequest.builder()
                 .username("admin")
@@ -93,6 +77,7 @@ public class DeleteBookingTests {
     }
 
     @Test
+    @Step("Deleting a booking with a cookie")
     void deleteBookingCookiePositiveTest() {
 
         given()
@@ -111,6 +96,8 @@ public class DeleteBookingTests {
     }
 
     @Test
+    @io.qameta.allure.Muted
+    @Step("Deleting a booking with a token")
     void deleteBookingAuthorizationPositiveTest() {
 
         given()
@@ -129,6 +116,8 @@ public class DeleteBookingTests {
     }
 
     @Test
+    @io.qameta.allure.Muted
+    @Step("Negative test - Deleting a booking without authorisation")
     void deleteBookingWithoutAuthorisationNegativeTest() {
 
         given()

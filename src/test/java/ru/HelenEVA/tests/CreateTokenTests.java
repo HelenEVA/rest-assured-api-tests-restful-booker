@@ -1,23 +1,23 @@
 package ru.HelenEVA.tests;
 
+import io.qameta.allure.*;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.HelenEva.dao.CreateTokenRequest;
 import ru.HelenEva.dao.CreateTokenResponse;
+
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Properties;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class CreateTokenTests {
+@Severity(SeverityLevel.BLOCKER)
+@Feature("Create token")
 
-    private static final String PROPERTIES_FILE_PATH = "src/test/resources/application.properties";
-    private static CreateTokenRequest request;
-    static Properties properties = new Properties();
+public class CreateTokenTests extends BaseTest{
 
 
     @BeforeAll
@@ -35,6 +35,8 @@ public class CreateTokenTests {
     }
 
     @Test
+    @io.qameta.allure.Muted
+    @Step ("Creating a token - in correct authorisation")
     void createTokenPositiveTest() {
 
         CreateTokenResponse response = given()
@@ -58,6 +60,8 @@ public class CreateTokenTests {
     }
 
     @Test
+    @io.qameta.allure.Muted
+    @Step ("Negative test - incorrect password entry")
     void createTokenWithAWrongPasswordNegativeTest() {
 
         given()
@@ -78,6 +82,8 @@ public class CreateTokenTests {
     }
 
     @Test
+    @io.qameta.allure.Muted
+    @Step("Negative test - incorrect password and name entry")
     void createTokenWithAWrongUsernameAndPasswordNegativeTest() {
 
         Response response = given()

@@ -1,7 +1,6 @@
 package ru.HelenEVA.tests;
 
-import com.github.javafaker.Faker;
-import io.restassured.RestAssured;
+import io.qameta.allure.*;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -10,33 +9,19 @@ import org.junit.jupiter.api.Test;
 import ru.HelenEva.dao.BookingdatesRequest;
 import ru.HelenEva.dao.CreateTokenRequest;
 import ru.HelenEva.dao.PartialUpdateBookingRequest;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Properties;
+
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class PartialUpdateBookingTests {
+@Severity(SeverityLevel.BLOCKER)
+@Story("Partial update a booking")
+@Feature("Tests for changes to the booking")
 
-    private static final String PROPERTIES_FILE_PATH = "src/test/resources/application.properties";
-    private static CreateTokenRequest request;
-    private static BookingdatesRequest requestBookingdates;
-    private static PartialUpdateBookingRequest requestPartialupdate;
-    static Properties properties = new Properties();
-    static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    static Faker faker = new Faker();
-
-    static String token;
-    static String id;
+public class PartialUpdateBookingTests extends BaseTest {
 
     @BeforeAll
-    static void beforeAll() throws IOException {
-        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-        properties.load(new FileInputStream(PROPERTIES_FILE_PATH));
-        RestAssured.baseURI = properties.getProperty("base.url");
+    static void beforeAll() {
 
         request = CreateTokenRequest.builder()
                 .username("admin")
@@ -66,7 +51,7 @@ public class PartialUpdateBookingTests {
                 .statusCode(200)
                 .body("token", is(not(nullValue())))
                 .when()
-                .post("https://restful-booker.herokuapp.com/auth")
+                .post("auth")
                 .prettyPeek()
                 .body()
                 .jsonPath()
@@ -77,6 +62,7 @@ public class PartialUpdateBookingTests {
 
     @BeforeEach
     void setUp() {
+
         id = given()
                 .log()
                 .all()
@@ -112,6 +98,8 @@ public class PartialUpdateBookingTests {
     }
 
     @Test
+    @io.qameta.allure.Muted
+    @Step("Change of booking, authorization with cookies")
     void updateBookingCookiePositiveTest() {
 
         given()
@@ -140,6 +128,8 @@ public class PartialUpdateBookingTests {
     }
 
     @Test
+    @io.qameta.allure.Muted
+    @Step("Change of booking, authorization with token")
     void updateBookingAuthorisationPositiveTest() {
 
         Response response = given()
@@ -167,6 +157,8 @@ public class PartialUpdateBookingTests {
     }
 
     @Test
+    @io.qameta.allure.Muted
+    @Step ("Change of booking without authorization")
     void updateBookingWithoutAuthorisationNegativeTest() {
 
         given()
@@ -187,6 +179,8 @@ public class PartialUpdateBookingTests {
     }
 
     @Test
+    @io.qameta.allure.Muted
+    @Step("Changing the firstname in latin on the booking")
     void updateBookingFirstNameInLatinPositiveTest() {
 
         given()
@@ -209,6 +203,8 @@ public class PartialUpdateBookingTests {
     }
 
     @Test
+    @io.qameta.allure.Muted
+    @Step("Changing the firstname in capital letters  on the booking")
     void updateBookingFirstNameInCapitalLettersPositiveTest() {
 
 
@@ -232,6 +228,8 @@ public class PartialUpdateBookingTests {
     }
 
     @Test
+    @io.qameta.allure.Muted
+    @Step ("Changing the lastname in cyrillic on the booking")
     void updateBookingLastNameInCyrillicPositiveTest() {
         given()
                 .log()
@@ -253,6 +251,8 @@ public class PartialUpdateBookingTests {
     }
 
     @Test
+    @io.qameta.allure.Muted
+    @Step("Changing the firstname consisting of 1 character")
     void updateBookingFirstName1siSymbolPositiveTest() {
         given()
                 .log()
@@ -274,6 +274,8 @@ public class PartialUpdateBookingTests {
     }
 
     @Test
+    @io.qameta.allure.Muted
+    @Step("Changing the check in in correct")
     void updateBookingCheckInChangePositiveTest() {
 
         given()
@@ -296,6 +298,8 @@ public class PartialUpdateBookingTests {
     }
 
     @Test
+    @io.qameta.allure.Muted
+    @Step("Changing the check out in correct")
     void updateBookingCheckOutChangePositiveTest() {
 
         given()
