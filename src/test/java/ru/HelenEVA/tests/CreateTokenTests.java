@@ -1,12 +1,19 @@
 package ru.HelenEVA.tests;
 
 import io.qameta.allure.*;
+import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.HelenEva.dao.CreateTokenRequest;
 import ru.HelenEva.dao.CreateTokenResponse;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
+
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -15,13 +22,19 @@ import static org.hamcrest.MatcherAssert.assertThat;
 @Feature("Create token")
 @Story("Generate a user token")
 
-public class CreateTokenTests extends BaseTest{
+public class CreateTokenTests {
+    private static final String PROPERTIES_FILE_PATH = "src/test/resources/application.properties";
+    private static CreateTokenRequest request;
+    static Properties properties = new Properties();
 
 
     @BeforeAll
-    static void beforeAll() {
+    static void beforeSuit() throws IOException {
 
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+        RestAssured.filters(new AllureRestAssured());
+        properties.load(new FileInputStream(PROPERTIES_FILE_PATH));
+        RestAssured.baseURI=properties.getProperty("base.url");
 
         request = CreateTokenRequest.builder()
                 .username("admin")
