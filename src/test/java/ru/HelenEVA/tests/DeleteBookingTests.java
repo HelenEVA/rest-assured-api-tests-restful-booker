@@ -77,7 +77,8 @@ public class DeleteBookingTests extends BaseTest {
     }
 
     @Test
-    @Step("Deleting a booking with a cookie")
+    @Description("Deleting a booking with a cookie")
+    @Step("Delete booking cookie")
     void deleteBookingCookiePositiveTest() {
 
         given()
@@ -96,8 +97,8 @@ public class DeleteBookingTests extends BaseTest {
     }
 
     @Test
-    @io.qameta.allure.Muted
-    @Step("Deleting a booking with a token")
+    @Description("Deleting a booking with a token")
+    @Step("Delete booking authorization")
     void deleteBookingAuthorizationPositiveTest() {
 
         given()
@@ -116,8 +117,8 @@ public class DeleteBookingTests extends BaseTest {
     }
 
     @Test
-    @io.qameta.allure.Muted
-    @Step("Negative test - Deleting a booking without authorisation")
+    @Description("Negative test - Deleting a booking without authorisation")
+    @Step("Delete booking without authorization")
     void deleteBookingWithoutAuthorisationNegativeTest() {
 
         given()

@@ -7,21 +7,19 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.HelenEva.dao.CreateTokenRequest;
 import ru.HelenEva.dao.CreateTokenResponse;
-
-import java.io.FileInputStream;
-import java.io.IOException;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @Severity(SeverityLevel.BLOCKER)
 @Feature("Create token")
+@Story("Generate a user token")
 
 public class CreateTokenTests extends BaseTest{
 
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() {
 
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
@@ -30,13 +28,11 @@ public class CreateTokenTests extends BaseTest{
                 .password("password123")
                 .build();
 
-        properties.load(new FileInputStream(PROPERTIES_FILE_PATH));
-        RestAssured.baseURI = properties.getProperty("base.url");
     }
 
     @Test
-    @io.qameta.allure.Muted
-    @Step ("Creating a token - in correct authorisation")
+    @Description("Creating a token - in correct authorisation")
+    @Step ("Create token")
     void createTokenPositiveTest() {
 
         CreateTokenResponse response = given()
@@ -60,8 +56,8 @@ public class CreateTokenTests extends BaseTest{
     }
 
     @Test
-    @io.qameta.allure.Muted
-    @Step ("Negative test - incorrect password entry")
+    @Description("Negative test - incorrect password entry")
+    @Step ("Create token with a wrong password")
     void createTokenWithAWrongPasswordNegativeTest() {
 
         given()
@@ -82,8 +78,8 @@ public class CreateTokenTests extends BaseTest{
     }
 
     @Test
-    @io.qameta.allure.Muted
-    @Step("Negative test - incorrect password and name entry")
+    @Description("Negative test - incorrect password and name entry")
+    @Step("Create token with a wrong username and password")
     void createTokenWithAWrongUsernameAndPasswordNegativeTest() {
 
         Response response = given()

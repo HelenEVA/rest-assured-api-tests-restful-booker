@@ -98,8 +98,8 @@ public class PartialUpdateBookingTests extends BaseTest {
     }
 
     @Test
-    @io.qameta.allure.Muted
-    @Step("Change of booking, authorization with cookies")
+    @Description("Change of booking, authorization with cookies")
+    @Step("Update booking with cookie")
     void updateBookingCookiePositiveTest() {
 
         given()
@@ -128,8 +128,8 @@ public class PartialUpdateBookingTests extends BaseTest {
     }
 
     @Test
-    @io.qameta.allure.Muted
-    @Step("Change of booking, authorization with token")
+    @Description("Change of booking, authorization with token")
+    @Step("Update booking with authorisation")
     void updateBookingAuthorisationPositiveTest() {
 
         Response response = given()
@@ -157,8 +157,8 @@ public class PartialUpdateBookingTests extends BaseTest {
     }
 
     @Test
-    @io.qameta.allure.Muted
-    @Step ("Change of booking without authorization")
+    @Description("Change of booking without authorization")
+    @Step ("Update booking without authorisation")
     void updateBookingWithoutAuthorisationNegativeTest() {
 
         given()
@@ -179,8 +179,8 @@ public class PartialUpdateBookingTests extends BaseTest {
     }
 
     @Test
-    @io.qameta.allure.Muted
-    @Step("Changing the firstname in latin on the booking")
+    @Description("Changing the firstname in latin on the booking")
+    @Step("Update booking firstname in latin")
     void updateBookingFirstNameInLatinPositiveTest() {
 
         given()
@@ -203,8 +203,8 @@ public class PartialUpdateBookingTests extends BaseTest {
     }
 
     @Test
-    @io.qameta.allure.Muted
-    @Step("Changing the firstname in capital letters  on the booking")
+    @Description("Changing the firstname in capital letters  on the booking")
+    @Step("Update booking firstname in capital letters")
     void updateBookingFirstNameInCapitalLettersPositiveTest() {
 
 
@@ -228,8 +228,8 @@ public class PartialUpdateBookingTests extends BaseTest {
     }
 
     @Test
-    @io.qameta.allure.Muted
-    @Step ("Changing the lastname in cyrillic on the booking")
+    @Description("Changing the lastname in cyrillic on the booking")
+    @Step ("Update booking lastname in cyrillic")
     void updateBookingLastNameInCyrillicPositiveTest() {
         given()
                 .log()
@@ -251,8 +251,8 @@ public class PartialUpdateBookingTests extends BaseTest {
     }
 
     @Test
-    @io.qameta.allure.Muted
-    @Step("Changing the firstname consisting of 1 character")
+    @Description("Changing the firstname consisting of 1 character")
+    @Step("Update booking firstname 1 symbol")
     void updateBookingFirstName1siSymbolPositiveTest() {
         given()
                 .log()
@@ -274,8 +274,8 @@ public class PartialUpdateBookingTests extends BaseTest {
     }
 
     @Test
-    @io.qameta.allure.Muted
-    @Step("Changing the check in in correct")
+    @Description("Changing the check in in correct")
+    @Step("Update booking check in change")
     void updateBookingCheckInChangePositiveTest() {
 
         given()
@@ -298,8 +298,8 @@ public class PartialUpdateBookingTests extends BaseTest {
     }
 
     @Test
-    @io.qameta.allure.Muted
-    @Step("Changing the check out in correct")
+    @Description("Changing the check out in correct")
+    @Step("Update booking check out change")
     void updateBookingCheckOutChangePositiveTest() {
 
         given()
