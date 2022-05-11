@@ -6,11 +6,12 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.HelenEva.dao.CreateTokenRequest;
 import ru.HelenEva.dao.CreateTokenResponse;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -23,6 +24,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 @Story("Generate a user token")
 
 public class CreateTokenTests {
+    static final Logger log = LoggerFactory.getLogger(CreateTokenTests.class);
+
     private static final String PROPERTIES_FILE_PATH = "src/test/resources/application.properties";
     private static CreateTokenRequest request;
     static Properties properties = new Properties();
@@ -31,7 +34,10 @@ public class CreateTokenTests {
     @BeforeAll
     static void beforeSuit() throws IOException {
 
+        log.info("Data preparation");
+        log.info("Create a token");
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+        log.info("Connecting the filter for the report");
         RestAssured.filters(new AllureRestAssured());
         properties.load(new FileInputStream(PROPERTIES_FILE_PATH));
         RestAssured.baseURI=properties.getProperty("base.url");
@@ -40,6 +46,8 @@ public class CreateTokenTests {
                 .username("admin")
                 .password("password123")
                 .build();
+        log.info(request.toString());
+
 
     }
 
@@ -48,6 +56,7 @@ public class CreateTokenTests {
     @Step ("Create token")
     void createTokenPositiveTest() {
 
+        log.info("Start test - Create a token");
         CreateTokenResponse response = given()
                 .log()
                 .method()
@@ -66,6 +75,8 @@ public class CreateTokenTests {
                 .extract()
                 .as(CreateTokenResponse.class);
         assertThat (response.getToken().length(),equalTo(15));
+        log.info("The token is: " + response.getToken());
+        log.info("End test - Create a token");
     }
 
     @Test
@@ -73,6 +84,7 @@ public class CreateTokenTests {
     @Step ("Create token with a wrong password")
     void createTokenWithAWrongPasswordNegativeTest() {
 
+        log.info("Start test - Create token with a wrong password");
         given()
                 .log()
                 .method()
@@ -88,6 +100,7 @@ public class CreateTokenTests {
                 .then()
                 .statusCode(200)
                 .body("reason", equalTo("Bad credentials"));
+        log.info("End test - Create token with a wrong password");
     }
 
     @Test
@@ -95,6 +108,7 @@ public class CreateTokenTests {
     @Step("Create token with a wrong username and password")
     void createTokenWithAWrongUsernameAndPasswordNegativeTest() {
 
+        log.info("Start test - Create token with a wrong username and password");
         Response response = given()
                 .log()
                 .method()
@@ -109,6 +123,7 @@ public class CreateTokenTests {
                 .prettyPeek();
         assertThat(response.statusCode(), equalTo(200));
         assertThat(response.body().jsonPath().get("reason"), containsStringIgnoringCase("Bad credentials"));
+        log.info("End test - Create token with a wrong username and password");
 
     }
 }

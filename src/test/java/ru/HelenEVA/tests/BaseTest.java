@@ -4,7 +4,10 @@ import com.github.javafaker.Faker;
 import io.qameta.allure.Story;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
+import lombok.ToString;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.platform.commons.logging.Logger;
+import org.junit.platform.commons.logging.LoggerFactory;
 import ru.HelenEva.dao.BookingdatesRequest;
 import ru.HelenEva.dao.CreateTokenRequest;
 import ru.HelenEva.dao.PartialUpdateBookingRequest;
@@ -13,6 +16,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Properties;
+
 
 public abstract class BaseTest {
 

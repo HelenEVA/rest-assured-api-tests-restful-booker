@@ -1,9 +1,12 @@
 package ru.HelenEVA.tests;
 
 import io.qameta.allure.*;
+import lombok.ToString;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.HelenEva.dao.BookingdatesRequest;
 import ru.HelenEva.dao.CreateTokenRequest;
 import ru.HelenEva.dao.PartialUpdateBookingRequest;
@@ -15,20 +18,28 @@ import static org.hamcrest.CoreMatchers.*;
 @Story("Delete a booking")
 @Feature("Tests for booking deletion")
 
+@ToString
+
 public class DeleteBookingTests extends BaseTest {
+
+    final static Logger log = LoggerFactory.getLogger(DeleteBookingTests.class);
 
     @BeforeAll
     static void beforeAll() {
 
+        log.info("Start of DeleteBookingTests");
         request = CreateTokenRequest.builder()
                 .username("admin")
                 .password("password123")
                 .build();
+        log.info(request.toString());
 
+        log.info("Create a booking dates");
         requestBookingdates = BookingdatesRequest.builder()
                 .checkin(dateFormat.format(faker.date().birthday().getDate()))
                 .checkout(dateFormat.format(faker.date().birthday().getDate()))
                 .build();
+        log.info(requestBookingdates.toString());
 
         requestPartialupdate = PartialUpdateBookingRequest.builder()
                 .firstname("Mary")
@@ -38,6 +49,7 @@ public class DeleteBookingTests extends BaseTest {
                 .bookingdates(requestBookingdates)
                 .additionalneeds("Breakfast")
                 .build();
+        log.info(requestPartialupdate.toString());
 
         token = given()
                 .log()
@@ -54,6 +66,7 @@ public class DeleteBookingTests extends BaseTest {
                 .jsonPath()
                 .get("token")
                 .toString();
+        log.info("The token is: " + token);
 
     }
 
@@ -74,6 +87,7 @@ public class DeleteBookingTests extends BaseTest {
                 .jsonPath()
                 .get("bookingid")
                 .toString();
+        log.info("Booking id is: " + id);
     }
 
     @Test
@@ -81,6 +95,7 @@ public class DeleteBookingTests extends BaseTest {
     @Step("Delete booking cookie")
     void deleteBookingCookiePositiveTest() {
 
+        log.info("Start test - Delete booking cookie");
         given()
                 .log()
                 .method()
@@ -94,6 +109,7 @@ public class DeleteBookingTests extends BaseTest {
                 .prettyPeek()
                 .then()
                 .statusCode(201);
+        log.info("End test - Delete booking cookie");
     }
 
     @Test
@@ -101,6 +117,7 @@ public class DeleteBookingTests extends BaseTest {
     @Step("Delete booking authorization")
     void deleteBookingAuthorizationPositiveTest() {
 
+        log.info("Start test - Delete booking authorization");
         given()
                 .log()
                 .method()
@@ -114,6 +131,7 @@ public class DeleteBookingTests extends BaseTest {
                 .prettyPeek()
                 .then()
                 .statusCode(201);
+        log.info("End test - Delete booking authorization");
     }
 
     @Test
@@ -121,6 +139,7 @@ public class DeleteBookingTests extends BaseTest {
     @Step("Delete booking without authorization")
     void deleteBookingWithoutAuthorisationNegativeTest() {
 
+        log.info("Start test - Delete booking without authorization");
         given()
                 .log()
                 .method()
@@ -133,5 +152,6 @@ public class DeleteBookingTests extends BaseTest {
                 .prettyPeek()
                 .then()
                 .statusCode(403);
+        log.info("End test - Delete booking without authorization");
     }
 }
