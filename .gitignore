@@ -2,4 +2,4 @@ target
 .idea
 *.iml
 *.allure
-allure-results
+*allure-results
